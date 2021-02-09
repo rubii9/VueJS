@@ -87,6 +87,7 @@ export default {
       //Búsqueda
       searchMovie: "",
       searchedMovies: [],
+      debounce: null,
     };
   },
   computed: {
