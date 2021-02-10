@@ -9,6 +9,9 @@
       <span class="mr-1" :class="movie.deleted ? 'deleted' : ''">{{
         movie.title
       }}</span>
+      <span v-if="movie.deleted" class="pill">Borrada</span>
+      <span v-if="movie.favourite" class="pill">Favorita</span>
+
       <m-button
         title="🗑"
         type="trans"
@@ -62,9 +65,23 @@
       placeholder="búsqueda..."
       v-model="searchMovie"
       id="search"
+      class="mr-1"
     />
+    <i v-if="isSearching" class="fas fa-circle-notch fa-spin"></i>
+
     <p v-for="movie in searchedMovies" :key="'searched-' + movie.id">
+      <img
+        :src="'https://image.tmdb.org/t/p/w200/' + movie.poster_path"
+        alt="imagen de la película"
+      />
+      <br />
       {{ movie.title }}
+      <br />
+      <m-button
+        title="Mostrar detalles"
+        type="default"
+        @pressed="movieDetails(movie.id)"
+      ></m-button>
     </p>
   </div>
 </template>
@@ -72,6 +89,7 @@
 <script>
 import data from "@/data/data.json";
 import MButton from "./components/MButton.vue";
+import mdb from "@/api/api.js";
 
 let counter = data.data.length;
 
@@ -88,6 +106,8 @@ export default {
       searchMovie: "",
       searchedMovies: [],
       debounce: null,
+      isSearching: false,
+      details: null,
     };
   },
   computed: {
@@ -109,12 +129,16 @@ export default {
 
       if (newValue === "") {
         this.searchedMovies = [];
+        this.isSearching = false;
+      } else {
+        this.isSearching = true;
+        this.debounce = setTimeout(() => {
+          mdb.searchMovies(newValue).then((movies) => {
+            this.searchedMovies = movies;
+            this.isSearching = false;
+          });
+        }, 500);
       }
-      this.debounce = setTimeout(() => {
-        this.searchedMovies = this.movies.filter((movie) =>
-          movie.title.includes(newValue)
-        );
-      }, 2000);
     },
   },
   methods: {
@@ -144,6 +168,12 @@ export default {
       if (movie !== undefined) {
         movie.favourite = true;
       }
+    },
+    movieDetails(movieId) {
+      mdb.getMovieDetails(movieId).then((details) => {
+        this.details = details;
+        console.log(details);
+      });
     },
   },
 };
@@ -210,5 +240,15 @@ export default {
 
 .deleted {
   text-decoration: line-through;
+}
+
+.pill {
+  font-size: 0.7rem;
+  background-color: #ddd;
+  border: none;
+  color: black;
+  padding: 0.3rem 0.5rem;
+  margin: 0.3rem 0.25rem;
+  border-radius: 16px;
 }
 </style>
