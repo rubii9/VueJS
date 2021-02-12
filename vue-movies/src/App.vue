@@ -1,146 +1,163 @@
 <template>
   <div id="app">
-    <h1>
-      <img src="@/assets/logo.png" class="logo" />
-      <span class="logo-text">ue movies</span>
-    </h1>
+    <the-header
+      :tabs="['Populares', 'Favoritas', 'Buscar']"
+      @select="selected"
+    ></the-header>
 
     <p v-for="movie in displayedMovies" :key="movie.id">
-      <span class="mr-1" :class="movie.deleted ? 'deleted' : ''">{{
-        movie.title
-      }}</span>
-      <span v-if="movie.deleted" class="pill">Borrada</span>
-      <span v-if="movie.favourite" class="pill">Favorita</span>
-
+      <span class="mr-1">{{ movie.title }}</span>
+      <m-pill v-if="movie.deleted">Borrada</m-pill>
+      <m-pill v-if="movie.favourite">Favorita</m-pill>
+      <m-button @click="addFavourite(movie.id)" v-if="!movie.favourite">
+        <i class="far fa-star"></i>
+      </m-button>
       <m-button
-        title="🗑"
-        type="trans"
-        @pressed="deleteMovie(movie.id)"
+        @click="deleteMovie(movie.id)"
+        type="danger"
         v-if="!movie.deleted"
-      ></m-button>
-      <m-button
-        title="🌟"
-        type="trans"
-        @pressed="addFavourite(movie.id)"
-        v-if="!movie.favourite"
-      ></m-button>
+      >
+        <i class="far fa-trash-alt"></i>
+      </m-button>
     </p>
 
     <div>
-      <input
-        type="text"
-        v-model.trim="newMovie"
-        class="mr-1"
-        placeholder="Título de la película"
-        @keyup.enter="addMovie"
-      />
-      <m-button
-        title="Añafdir película"
-        type="default"
-        @pressed="addMovie"
-      ></m-button>
-
       <br />
 
-      <input id="show-deleted" type="checkbox" v-model="showAll" />
-      <label for="show-deleted">Mostrar todas</label>
-
+      <m-input
+        id="add-movie"
+        type="text"
+        placeholder="Título de la película"
+        v-model.trim="newMovie"
+        @keyup.enter="addMovie"
+      >
+        <m-button @click="addMovie" title="Añadir película" />
+      </m-input>
       <br />
       <small v-if="showError" style="color: indianred">
         Debe introducir el título de la película para añadirla
       </small>
+      <br />
+
+      <m-checkbox
+        id="show-deleted"
+        label="Mostrar películas borradas"
+        v-model="showDeleted"
+      ></m-checkbox>
     </div>
 
     <br />
     <h2>Favoritas</h2>
-    <p v-for="movie in favouriteMovies" :key="'favourite-' + movie.id">
+    <p v-for="movie in favouriteMovies" :key="'favorite-' + movie.id">
       {{ movie.title }}
     </p>
 
     <br />
     <h2>Busca tu película</h2>
-    <label for="search" class="mr-1">Buscar película</label>
-    <input
-      type="text"
-      placeholder="búsqueda..."
-      v-model="searchMovie"
-      id="search"
-      class="mr-1"
+    <m-select
+      id="select"
+      label="Selecciona el año"
+      :options="options"
+      v-model="year"
     />
-    <i v-if="isSearching" class="fas fa-circle-notch fa-spin"></i>
+    <br />
 
-    <p v-for="movie in searchedMovies" :key="'searched-' + movie.id">
-      <img
-        :src="'https://image.tmdb.org/t/p/w200/' + movie.poster_path"
-        alt="imagen de la película"
-      />
-      <br />
-      {{ movie.title }}
-      <br />
-      <m-button
-        title="Mostrar detalles"
-        type="default"
-        @pressed="movieDetails(movie.id)"
-      ></m-button>
-    </p>
+    <m-input
+      id="search-1"
+      label="Buscar película:"
+      placeholder="Búsqueda..."
+      v-model="searchTerm"
+    >
+      <span v-if="isSearching">
+        <i class="fas fa-circle-notch fa-spin"></i>
+      </span>
+    </m-input>
+
+    <div class="cards">
+      <movie-card
+        v-for="movie in searchedMovies"
+        :movie="movie"
+        :key="'searched-' + movie.id"
+        @click="getMovieDetail(movie.id)"
+      ></movie-card>
+    </div>
   </div>
 </template>
 
 <script>
 import data from "@/data/data.json";
-import MButton from "./components/MButton.vue";
-import mdb from "@/api/api.js";
+import MButton from "@/components/MButton";
+import mdb from "@/api/api";
+import MPill from "./components/MPill.vue";
+import MovieCard from "./components/MovieCard.vue";
+import TheHeader from "./components/TheHeader.vue";
+import MInput from "./components/MInput.vue";
+import MCheckbox from "./components/MCheckbox.vue";
+import MSelect from "@/components/MSelect";
 
 let counter = data.data.length;
 
+const optionsGenerator = () => {
+  let array = [];
+  let actualYear = new Date();
+  actualYear = actualYear.getFullYear();
+  let lowLimit = actualYear - 40;
+  for (let i = actualYear; i >= lowLimit; i--) {
+    array.push(i);
+  }
+  return array;
+};
+
 export default {
   name: "App",
-  components: { MButton },
+  components: {
+    MButton,
+    MPill,
+    MovieCard,
+    TheHeader,
+    MInput,
+    MCheckbox,
+    MSelect,
+  },
   data() {
     return {
       movies: data.data,
       newMovie: "",
       showError: false,
-      showAll: false,
-      //Búsqueda
-      searchMovie: "",
+      showDeleted: false,
+      // búsqueda
       searchedMovies: [],
-      debounce: null,
+      searchTerm: "",
       isSearching: false,
-      details: null,
+      debounce: null,
+      movieDetail: null,
+      year: "",
+      options: optionsGenerator(),
     };
   },
   computed: {
     displayedMovies() {
-      if (!this.showAll) {
-        return this.movies.filter((movie) => !movie.deleted);
-      } else return this.movies;
+      if (this.showDeleted) {
+        return this.movies;
+      }
+      return this.movies.filter((movie) => !movie.deleted);
     },
     favouriteMovies() {
-      if (this.showAll) {
+      if (this.showDeleted) {
         return this.movies.filter((movie) => movie.favourite);
       }
       return this.movies.filter((movie) => movie.favourite && !movie.deleted);
     },
   },
   watch: {
-    searchMovie: function(newValue) {
-      clearInterval(this.debounce);
-
-      if (newValue === "") {
-        this.searchedMovies = [];
-        this.isSearching = false;
-      } else {
-        this.isSearching = true;
-        this.debounce = setTimeout(() => {
-          mdb.searchMovies(newValue).then((movies) => {
-            this.searchedMovies = movies;
-            this.isSearching = false;
-          });
-        }, 500);
-      }
+    searchTerm() {
+      this.searchMovies();
+    },
+    year() {
+      this.searchMovies();
     },
   },
+
   methods: {
     addMovie() {
       this.showError = false;
@@ -169,11 +186,40 @@ export default {
         movie.favourite = true;
       }
     },
-    movieDetails(movieId) {
-      mdb.getMovieDetails(movieId).then((details) => {
-        this.details = details;
-        console.log(details);
+    // this can be use instead of watcher to search movies in api
+    async asyncSearchMovies() {
+      this.searchedMovies = await mdb.asyncSearchMovies(this.searchTerm);
+    },
+    getMovieDetail(movieID) {
+      mdb.getMovieDetails(movieID).then((movie) => {
+        this.movieDetail = movie;
+        console.log(this.movieDetail);
       });
+    },
+    async asyncGetMovieDetail(movieID) {
+      this.movieDetail = await mdb.getMovieDetails(movieID);
+    },
+    selected(tab) {
+      console.log(tab);
+    },
+    searchMovies() {
+      clearInterval(this.debounce);
+      if (this.searchTerm === "") {
+        this.searchedMovies = [];
+        this.isSearching = false;
+      } else {
+        const params = { query: this.searchTerm };
+        if (this.year !== "") {
+          params.year = this.year;
+        }
+        this.isSearching = true;
+        this.debounce = setTimeout(() => {
+          mdb.searchMovies(params).then((movies) => {
+            this.searchedMovies = movies;
+            this.isSearching = false;
+          });
+        }, 500);
+      }
     },
   },
 };
@@ -237,18 +283,8 @@ export default {
 .logo-text {
   margin-left: -0.1rem;
 }
-
-.deleted {
-  text-decoration: line-through;
-}
-
-.pill {
-  font-size: 0.7rem;
-  background-color: #ddd;
-  border: none;
-  color: black;
-  padding: 0.3rem 0.5rem;
-  margin: 0.3rem 0.25rem;
-  border-radius: 16px;
+.cards {
+  display: flex;
+  flex-wrap: wrap;
 }
 </style>

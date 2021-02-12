@@ -1,13 +1,24 @@
 <template>
-  <button class="btn" :class="type" @click="$emit('pressed', $event)">
-    {{ title }}
+  <button class="btn" :class="type" @click="$emit('click', $event)">
+    <slot>{{ title }}</slot>
   </button>
 </template>
 
 <script>
 export default {
   name: "MButton",
-  props: ["title", "type"],
+  props: {
+    type: {
+      type: String,
+      default: "default",
+      validator: function(value) {
+        return ["default", "danger"].indexOf(value) !== -1;
+      },
+    },
+    title: {
+      type: String,
+    },
+  },
 };
 </script>
 
