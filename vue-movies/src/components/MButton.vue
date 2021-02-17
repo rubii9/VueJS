@@ -1,5 +1,9 @@
 <template>
-  <button class="btn" :class="type" @click="$emit('click', $event)">
+  <button
+      class="btn"
+      :class="type"
+      @click="$emit('click', $event)"
+  >
     <slot>{{ title }}</slot>
   </button>
 </template>
@@ -10,16 +14,16 @@ export default {
   props: {
     type: {
       type: String,
-      default: "default",
-      validator: function(value) {
-        return ["default", "danger"].indexOf(value) !== -1;
-      },
+      default: 'default',
+      validator: function (value) {
+        return ['default', 'danger'].indexOf(value) !== -1
+      }
     },
     title: {
-      type: String,
+      type: String
     },
-  },
-};
+  }
+}
 </script>
 
 <style scoped>
@@ -29,7 +33,7 @@ export default {
   padding: 0.4rem 0.6rem;
   cursor: pointer;
   border-radius: 4px;
-  margin: 0 0.2rem;
+  margin: 0 0.5rem;
 }
 
 .btn:focus {
@@ -38,20 +42,16 @@ export default {
 }
 
 .default {
-  background-color: #409dd3;
+  background-color: #2196F3;
 }
 .default:hover {
   background-color: #0b7dda;
 }
 .danger {
-  background-color: #ce3c3c;
+  background-color: #e13d31;
 }
 .danger:hover {
-  background-color: #d63a2f;
+  background-color: #da190b;
 }
 
-.trans {
-  background: transparent;
-  font-size: 1.25rem;
-}
 </style>

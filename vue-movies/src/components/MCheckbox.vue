@@ -1,12 +1,12 @@
 <template>
   <div>
-    <label :for="id" class="mr-1">{{ label }}:</label>
+    <label v-if="label" :for="id">{{ label }}:</label>
     <input
-      :id="id"
-      type="checkbox"
-      :checked="value"
-      @input="$emit('input', $event.target.checked)"
-    />
+        :id="id"
+        type="checkbox"
+        :checked="value"
+        @input="$emit('input', $event.target.checked)"
+    >
   </div>
 </template>
 
@@ -16,7 +16,7 @@ export default {
   props: {
     id: {
       type: String,
-      required: true,
+      required: true
     },
     value: {
       type: Boolean,
@@ -24,9 +24,11 @@ export default {
     },
     label: {
       type: String,
-    },
+    }
   },
-};
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+
+</style>

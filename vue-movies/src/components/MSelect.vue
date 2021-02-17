@@ -1,38 +1,31 @@
 <template>
   <div class="mr-1">
     <label v-if="label !== ''" :for="id" class="mr-1">{{ label }}</label>
-    <select :name="id" :id="id" @input="$emit('input', $event.target.value)">
-      <option v-if="optional"></option>
+    <select :name="id" :value="value" :id="id" @input="changedValue">
+      <option v-if="optional" ></option>
       <option v-for="option in options" :key="option">{{ option }}</option>
     </select>
   </div>
 </template>
 
 <script>
+import InputTextMixin from "@/mixins/InputTextMixin";
+
+
 export default {
   name: "MSelect",
+  mixins: [InputTextMixin],
   props: {
-    id: {
-      type: String,
-      required: true,
-    },
-    label: {
-      type: String,
-    },
-    value: {
-      type: String,
-      required: true,
-    },
     options: {
       type: Array,
-      required: true,
+      required: true
     },
     optional: {
       type: Boolean,
       default: true,
-    },
+    }
   },
-};
+}
 </script>
 
 <style scoped>
