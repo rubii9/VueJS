@@ -1,39 +1,32 @@
 <template>
   <div>
     <loading-component :is-loading="isLoading">
-      <movie-deck
-          :movies="movies"
-      />
+      <template v-slot:default>
+        <movie-deck
+            :movies="popularMovies"
+            @click="$router.push({name: 'movie', params: {id: $event.id}})"
+        />
+      </template>
     </loading-component>
   </div>
 </template>
 
 <script>
-import mdb from "@/api/api"
 import LoadingComponent from "@/components/LoadingComponent";
 import MovieDeck from "@/components/movies/MovieDeck";
+import {mapActions, mapState} from 'vuex'
 
 export default {
   name: "PopularView",
   components: {MovieDeck, LoadingComponent},
-  data() {
-    return {
-      movies: [],
-      isLoading: true,
-    }
+  computed: {
+    ...mapState('movie', ['popularMovies', 'isLoading']),
   },
   created() {
     this.getPopular()
   },
   methods: {
-    getPopular() {
-      this.isLoading = true
-      mdb.getPopular()
-          .then(movies => {
-            this.movies = movies
-            this.isLoading = false
-          })
-    }
+    ...mapActions('movie', ['getPopular']),
   },
 }
 </script>

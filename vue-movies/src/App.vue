@@ -1,13 +1,7 @@
 <template>
   <div id="app">
-    <the-header
-        @login="login"
-        :user="user"
-    />
-
-    <router-view
-        :user="user"
-    />
+    <the-header @login="login" />
+    <router-view />
   </div>
 </template>
 
@@ -18,6 +12,7 @@ import TheHeader from "@/components/header/TheHeader";
 import PopularMovies from "@/components/movies/PopularMovies";
 import FavouriteMovies from "@/components/movies/FavouriteMovies";
 import SearchMovies from "@/components/movies/SearchMovies";
+import {mapState, mapMutations, mapActions} from "vuex";
 
 let counter = data.data.length;
 
@@ -35,7 +30,16 @@ export default {
         FavouriteMovies,
       ],
       useDynamicComponents: false,
-      user: null,
+    }
+  },
+  computed: {
+    ...mapState('user',['user']),
+  },
+  watch: {
+    user(newValue, oldValue) {
+      if (oldValue === null && newValue !== null && this.$route.query.request_token) {
+        this.$router.push({name: 'popular', query: {}})
+      }
     }
   },
   created() {
@@ -43,12 +47,13 @@ export default {
     const requestToken = urlParams.get('request_token')
     if (requestToken !== null) {
       this.createSession(requestToken)
-    }
-    if (mdb.hasSessionId()) {
+    } else {
       this.getAccount()
     }
   },
   methods: {
+    ...mapMutations('user', ['setUser']),
+    ...mapActions('user', ['createSession', 'getAccount']),
     addMovie(newMovie) {
       counter += 1;
       this.movies.push({
@@ -81,17 +86,6 @@ export default {
           location.replace(url)
         })
     },
-    createSession(requestToken) {
-      mdb.createSession(requestToken)
-        .then(sessionID => {
-          console.log(sessionID)
-          location.replace('/')
-        })
-    },
-    getAccount() {
-      mdb.getAccount()
-        .then(user => this.user = user)
-    }
   },
 }
 </script>

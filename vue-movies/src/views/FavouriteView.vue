@@ -2,30 +2,29 @@
   <div>
     <h1>Favoritas</h1>
     <loading-component :is-loading="isLoading">
-      <movie-deck
-          :movies="movies"
-      />
+      <template v-slot:default>
+        <movie-deck
+            :movies="movies"
+            @click="$router.push({name: 'movie', params: {id: $event.id}})"
+        />
+      </template>
     </loading-component>
   </div>
 </template>
 
 <script>
-import mdb from "@/api/api"
 import MovieDeck from "@/components/movies/MovieDeck";
 import LoadingComponent from "@/components/LoadingComponent";
+import {mapActions, mapState} from "vuex";
 
 export default {
   name: "FavouriteView",
   components: {LoadingComponent, MovieDeck},
-  props: {
-    user: {
-      type: Object,
-    },
-  },
-  data() {
-    return {
-      movies: [],
-      isLoading: true,
+  computed: {
+    ...mapState('user', ['user']),
+    ...mapState('movie', ['favouriteMovies', 'isLoading']),
+    movies() {
+      return this.favouriteMovies
     }
   },
   watch: {
@@ -37,17 +36,7 @@ export default {
     this.getFavouriteMovies()
   },
   methods: {
-    getFavouriteMovies() {
-      this.isLoading = true
-      console.log(this.user)
-      if (this.user !== null) {
-        mdb.getFavourites(this.user.id)
-            .then(movies => {
-              this.isLoading = false
-              this.movies = movies
-            })
-      }
-    }
+    ...mapActions('movie', ['getFavouriteMovies']),
   },
 }
 </script>

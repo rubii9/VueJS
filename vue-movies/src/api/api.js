@@ -61,6 +61,13 @@ const mdb = {
         .catch(error => console.log(error))
   },
 
+  getCastAndCrew: (movieId) => {
+    return instance.get(`/movie/${movieId}/credits`, defaultConfig)
+        .then(response => {
+          return response.data;
+        })
+  },
+
   asyncGetMovieDetails: async (movieID) => {
     try {
       const response = await instance.get(`/movie/${movieID}`, defaultConfig)
@@ -76,6 +83,9 @@ const mdb = {
   },
 
   // authentication
+  isAuthenticated() {
+    return localStorage.getItem(SESSION_KEY) !== null
+  },
   requestToken: function () {
     return instance.get('/authentication/token/new', defaultConfig)
         .then(response => {
@@ -106,10 +116,10 @@ const mdb = {
     const session_id = localStorage.getItem(SESSION_KEY)
     return session_id !== null
   },
-  getAccount: function () {
+  getAccount: function (sessionId) {
     return instance.get('/account', {params: {
         ...defaultArgs,
-        session_id: localStorage.getItem(SESSION_KEY),
+        session_id: sessionId,
       }})
         .then(response => {
           return response.data
@@ -127,6 +137,42 @@ const mdb = {
           return response.data.results
         })
   },
+  getUserMovieDetail(movieId) {
+    const params = {
+      ...defaultArgs,
+      session_id: localStorage.getItem(SESSION_KEY),
+    }
+    return instance.get(`/movie/${movieId}/account_states`, {params})
+        .then(response => {
+          return response.data
+        })
+  },
+  markAsFavourite(userId, movieId) {
+    return this.setMovieFavouriteState(userId, movieId, true)
+  },
+  unmarkAsFavourite(userId, movieId) {
+    return this.setMovieFavouriteState(userId, movieId, false)
+  },
+  setMovieFavouriteState(userId, movieId, favourite) {
+    const config = {
+      params: {
+        ...defaultArgs,
+        session_id: localStorage.getItem(SESSION_KEY),
+      },
+      headers: {
+        'Content-Type': 'application/json;charset=utf-8'
+      },
+    }
+    const data = {
+      media_type: 'movie',
+      media_id: movieId,
+      favorite: favourite,
+    }
+    return instance.post(`/account/${userId}/favorite`, data, config)
+        .then(response => {
+          return response.data
+        })
+  }
 }
 
 export default mdb

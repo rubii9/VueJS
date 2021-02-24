@@ -22,7 +22,7 @@
 
     <movie-deck
         :movies="searchedMovies"
-        @click="getMovieDetail($event.id)"
+        @click="$emit('click', $event, year, searchTerm)"
     />
   </div>
 </template>
@@ -80,15 +80,6 @@ export default {
     this.searchMovies()
   },
   methods: {
-    getMovieDetail(movieID) {
-      mdb.getMovieDetails(movieID)
-          .then(movie => {
-            this.movieDetail = movie
-          })
-    },
-    async asyncGetMovieDetail(movieID) {
-      this.movieDetail = await mdb.getMovieDetails(movieID)
-    },
     searchMovies() {
       clearInterval(this.debounce)
       if (this.searchTerm === '') {

@@ -3,6 +3,8 @@ import SearchView from "@/views/SearchView";
 import FavouriteView from "@/views/FavouriteView";
 import MovieView from "@/views/MovieView";
 import NotFound404View from "@/views/NotFound404View";
+import MovieDetail from "@/components/movies/MovieDetail";
+import MovieCast from "@/components/movies/MovieCast";
 
 export default [
   {
@@ -33,9 +35,29 @@ export default [
   },
   {
     path: '/movie/:id',
-    name: 'movie',
     component: MovieView,
-    props: true
+    props: true,
+    children: [
+      {
+        path: '',
+        name: 'movie',
+        component: MovieDetail,
+        props: true,
+      },
+      {
+        path: 'cast',
+        name: 'cast',
+        component: MovieCast,
+        props: true,
+      }
+    ],
+    // beforeEnter: (to, from, next) => {
+    //   if (to.params.id.toString() === "464052") {
+    //     next(false)
+    //   } else {
+    //     next()
+    //   }
+    // }
   },
   {
     path: '/other-movie/:movieID',

@@ -22,13 +22,18 @@
     </router-link>
 
     <router-link
+        v-if="isAuthenticated"
         :to="{name: 'favourite'}"
         :active-class="activeClass"
         :class="linkClass"
     >
       <i class="far fa-star"></i>Favoritas
+      <m-pill>{{ countFavourites }}</m-pill>
     </router-link>
 
+    <button v-if="isAuthenticated" style="float: right" class="link" @click="getAccount">
+      Refrescar usuario
+    </button>
     <a
         style="float: right"
         class="link"
@@ -38,25 +43,29 @@
       <span v-if="user">{{ user.username }}</span>
       <span v-else>Login</span>
     </a>
-
   </div>
 </template>
 
 <script>
+import {mapActions, mapGetters, mapState} from "vuex";
+import MPill from "@/components/MPill";
+
 export default {
   name: "TheHeader",
-  props: {
-    user: {
-      type: Object,
-    }
-  },
+  components: {MPill},
   computed: {
+    ...mapState('user', ['user', 'sessionId']),
+    ...mapGetters('user', ['isAuthenticated']),
+    ...mapGetters('movie', ['countFavourites']),
     linkClass() {
       return 'link';
     },
     activeClass() {
       return 'active'
     },
+  },
+  methods: {
+    ...mapActions(['getAccount']),
   },
 }
 </script>

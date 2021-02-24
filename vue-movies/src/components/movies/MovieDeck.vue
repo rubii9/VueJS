@@ -4,7 +4,7 @@
         v-for="movie in movies"
         :key="movie.id"
         :movie="movie"
-        @click="$router.push({name: 'movie', params: {id: movie.id}})"
+        @click="$emit('click', movie)"
     />
   </div>
 </template>
