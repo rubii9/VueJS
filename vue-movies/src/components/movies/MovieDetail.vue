@@ -11,19 +11,23 @@
     <p>Recaudación: {{ movie.revenue | money }}</p>
 
     <div v-if="isAuthenticated && isFavourite !== null">
-      <m-button
-          v-if="!isFavourite"
-          @click="markFavourite"
-      >
-        Añadir a favoritas
-      </m-button>
-      <m-button
-          v-else
-          type="danger"
-          @click="unmarkFavourite"
-      >
-        Borrar de favoritas
-      </m-button>
+      <fade-transition>
+        <m-button
+            v-if="!isFavourite"
+            @click="markFavourite"
+            key="add"
+        >
+          Añadir a favoritas
+        </m-button>
+        <m-button
+            v-else
+            type="danger"
+            @click="unmarkFavourite"
+            key="delete"
+        >
+          Borrar de favoritas
+        </m-button>
+      </fade-transition>
     </div>
   </div>
 </template>
@@ -33,10 +37,11 @@ import MButton from "@/components/MButton";
 import MovieRating from "@/components/MovieRating";
 import {mapActions, mapGetters, mapState} from "vuex";
 import MPill from "@/components/MPill";
+import FadeTransition from "@/components/tutorial/FadeTransition";
 
 export default {
   name: "MovieDetail",
-  components: {MPill, MovieRating, MButton},
+  components: {FadeTransition, MPill, MovieRating, MButton},
   filters: {
     money: function (value) {
       return `$ ${value.toFixed(2)}`

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <loading-component :is-loading="isLoading">
+    <loading-component :is-loading="popularMovies.length === 0">
       <template v-slot:default>
         <movie-deck
             :movies="popularMovies"

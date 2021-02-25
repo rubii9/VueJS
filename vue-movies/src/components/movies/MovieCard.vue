@@ -1,5 +1,5 @@
 <template>
-  <div class="card" @click="clicked">
+  <div class="card" @click="clicked" :style="'transition-delay: ' + 0.1 * index + 's'">
     <img :src="movie.poster_path | apiImage" class="image-card">
     <div class="card-content">
       <p>{{ movie.title }}</p>
@@ -20,6 +20,10 @@ export default {
       type: Object,
       required: true,
     },
+    index: {
+      type: Number,
+      required: true,
+    }
   },
   methods: {
     clicked(event) {
@@ -32,7 +36,7 @@ export default {
 <style scoped>
 .card {
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-  transition: 0.3s;
+  /*transition: all 0.3s;*/
   border-radius: 0.3rem;
   margin: 1rem;
   flex: 0 1;

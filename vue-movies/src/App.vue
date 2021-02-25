@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <the-header @login="login" />
-    <router-view />
+    <the-header v-if="true" @login="login"/>
+    <router-view v-if="true"/>
+    <basic-animations v-if="false"/>
   </div>
 </template>
 
@@ -12,13 +13,14 @@ import TheHeader from "@/components/header/TheHeader";
 import PopularMovies from "@/components/movies/PopularMovies";
 import FavouriteMovies from "@/components/movies/FavouriteMovies";
 import SearchMovies from "@/components/movies/SearchMovies";
-import {mapState, mapMutations, mapActions} from "vuex";
+import {mapActions, mapMutations, mapState} from "vuex";
+import BasicAnimations from "@/components/tutorial/BasicAnimations";
 
 let counter = data.data.length;
 
 export default {
   name: 'App',
-  components: {TheHeader},
+  components: {BasicAnimations, TheHeader},
   data() {
     return {
       movies: data.data,
@@ -33,7 +35,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('user',['user']),
+    ...mapState('user', ['user']),
   },
   watch: {
     user(newValue, oldValue) {
@@ -81,10 +83,10 @@ export default {
     },
     login() {
       mdb.requestToken()
-        .then(url => {
-          // console.log(url)
-          location.replace(url)
-        })
+          .then(url => {
+            // console.log(url)
+            location.replace(url)
+          })
     },
   },
 }

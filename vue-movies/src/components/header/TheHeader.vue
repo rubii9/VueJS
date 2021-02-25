@@ -1,44 +1,53 @@
 <template>
   <div class="navbar">
     <div class="logo-container">
-      <img src="@/assets/logo.png" class="logo">
+      <img src="@/assets/logo.png" class="logo" />
       <span class="logo-text">ue-movies</span>
     </div>
 
     <router-link
-        :to="{name: 'popular'}"
-        :active-class="activeClass"
-        :class="linkClass"
+      :to="{ name: 'popular' }"
+      :active-class="activeClass"
+      :class="linkClass"
     >
       <i class="fas fa-film"></i>Popular
     </router-link>
 
     <router-link
-        :to="{name: 'search'}"
-        :active-class="activeClass"
-        :class="linkClass"
+      :to="{ name: 'search' }"
+      :active-class="activeClass"
+      :class="linkClass"
     >
       <i class="fas fa-search"></i>Buscar
     </router-link>
 
     <router-link
-        v-if="isAuthenticated"
-        :to="{name: 'favourite'}"
-        :active-class="activeClass"
-        :class="linkClass"
+      v-if="isAuthenticated"
+      :to="{ name: 'favourite' }"
+      :active-class="activeClass"
+      :class="linkClass"
     >
       <i class="far fa-star"></i>Favoritas
       <m-pill>{{ countFavourites }}</m-pill>
     </router-link>
 
-    <button v-if="isAuthenticated" style="float: right" class="link" @click="getAccount">
+    <button
+      v-if="isAuthenticated"
+      style="float: right"
+      class="link"
+      @click="getAccount"
+    >
       Refrescar usuario
     </button>
-    <a
-        style="float: right"
-        class="link"
-        @click="$emit('login')"
+    <button
+      v-if="isAuthenticated"
+      style="float: right"
+      class="link"
+      @click="logout"
     >
+      Logout
+    </button>
+    <a style="float: right" class="link" @click="$emit('login')">
       <i class="far fa-user mr-1"></i>
       <span v-if="user">{{ user.username }}</span>
       <span v-else>Login</span>
@@ -47,27 +56,31 @@
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 import MPill from "@/components/MPill";
 
 export default {
   name: "TheHeader",
-  components: {MPill},
+  components: { MPill },
   computed: {
-    ...mapState('user', ['user', 'sessionId']),
-    ...mapGetters('user', ['isAuthenticated']),
-    ...mapGetters('movie', ['countFavourites']),
+    ...mapState("user", ["user", "sessionId"]),
+    ...mapGetters("user", ["isAuthenticated"]),
+    ...mapGetters("movie", ["countFavourites"]),
     linkClass() {
-      return 'link';
+      return "link";
     },
     activeClass() {
-      return 'active'
+      return "active";
     },
   },
   methods: {
-    ...mapActions(['getAccount']),
+    ...mapActions(["getAccount"]),
+    logout() {
+      localStorage.removeItem("session_id");
+      location.reload();
+    },
   },
-}
+};
 </script>
 
 <style scoped>
@@ -98,7 +111,7 @@ export default {
 }
 
 .navbar .link.active {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   transition: background-color 0.3s;
 }
 
