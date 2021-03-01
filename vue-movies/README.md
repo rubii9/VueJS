@@ -4,7 +4,7 @@ Proyecto realizado en VueJs, con api externa [TheMoviedb](https://www.themoviedb
 
 ## APP
 
-![Populares](/images/Populares.png)
+![Populares](images/Populares.png)
 
 ## Project setup
 
